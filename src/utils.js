@@ -5,19 +5,20 @@ export const getCurrentDateTime = () => {
     return currentDate.split('.')[0];
 }
 
-export const storeUserId = async userId => {
+export const storeUserId = async (value, filedName = "Id") => {
     try {
-        await AsyncStorage.setItem('Id', userId);
-        console.log('User ID stored successfully:', userId);
+        await AsyncStorage.setItem(filedName, value);
+        console.log('stored successfully:', value);
     } catch (error) {
         console.error('Error storing user ID:', error);
     }
 };
 
-export const retrieveUserId = async () => {
-
+export const retrieveUserId = async (fieldName = "Id") => {
+    // storeUserId(1)
+    // storeUserId('admin','user_type')
     try {
-        const userId = await AsyncStorage.getItem('Id');
+        const userId = await AsyncStorage.getItem(fieldName);
         if (userId !== null) {
             return userId;
         } else {

@@ -6,16 +6,16 @@ import JobRate from './Children/JobRate';
 import CustomerPayment from './CustomerPayment';
 
 const CustomerInformation = ({ route }) => {
-  const { cust_id, name, due, received, pageName } = route.params || {};
+  const { cust_id, name, due, received, pageName, isAdmin } = route.params || {};
 
   const renderMainContent = () => {
     switch (pageName) {
-      case 'customerRate':
-        return <CustomerJob customer_id={cust_id} />;
       case 'jobRate':
+        return <CustomerJob customer_id={cust_id} isAdmin={isAdmin} />;
+      case 'customerRate':
         return <JobRate customer_id={cust_id} />;
       case 'customerPayment':
-        return <CustomerPayment customer_id={cust_id} />;
+        return <CustomerPayment customer_id={cust_id} isAdmin={isAdmin} />;
       default:
         return null;
     }
@@ -45,16 +45,6 @@ const CustomerInformation = ({ route }) => {
               <Text style={styles.textStyle}>{parseFloat(item.value).toFixed(2)}</Text>
             </View>
           ))}
-        </View>
-        <View style={styles.amountContainer}>
-          <View>
-            <Text style={styles.boldFont}>Bank</Text>
-            <Text style={styles.textStyle}>1000</Text>
-          </View>
-          <View>
-            <Text style={styles.boldFont}>Cash</Text>
-            <Text style={styles.textStyle}>2000</Text>
-          </View>
         </View>
       </View>
       {renderMainContent()}
@@ -87,12 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  amountContainer: {
-    flexDirection: 'row',
-    paddingVertical: 4,
-    justifyContent: 'center',
-    gap: 32,
-  },
+
 });
 
 export default CustomerInformation;

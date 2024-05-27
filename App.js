@@ -17,6 +17,8 @@ import Expance from './pages/Expance/Expance';
 import CustomerJob from './pages/Customer/components/CustomerJob';
 import CustomerInformation from './pages/Customer/components/CustomerInformation';
 import AddCustomer from './pages/Customer/components/AddCustomer';
+import ManWiseReport from './pages/Reports/ManWiseReport';
+import SalesReport from './pages/Reports/SalersReport';
 
 
 
@@ -38,6 +40,10 @@ function App() {
         <Stack.Screen name="customerInformation" component={CustomerInformation} />
         <Stack.Screen name="customerJob" component={CustomerJob} />
         <Stack.Screen name="addCustomer" component={AddCustomer} />
+        <Stack.Screen name="report1" component={ManWiseReport} />
+        <Stack.Screen name="sales_report1" component={SalesReport} />
+
+
 
 
 

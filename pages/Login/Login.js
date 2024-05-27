@@ -57,8 +57,10 @@ export const Login = ({navigation}) => {
           setInputError({phone: true, password: true});
         } else {
           console.log('Login Success');
-          const {user_id} = myData;
+          console.log(myData);
+          const {user_id,user_type} = myData;
           storeUserId(`${user_id}`);
+          storeUserId(user_type,'user_type');
           navigation.navigate('dashboard');
         }
       })

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,13 +7,21 @@ import {
     StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { ADD_JOBS, BASE_URL } from '../../../src/constant';
 import axios from 'axios';
+import { ADD_JOBS, BASE_URL, EDIT_JOB } from '../../../src/constant';
 
-const AddJob = ({ allSalesman, setLoading, customerId, onSubmit }) => {
+const AddJob = ({ allSalesman, setLoading, customerId, onSubmit, selectCustomer, isEdit, setSelectCustomer }) => {
     const [qty, setQty] = useState('');
     const [category, setCategory] = useState('');
     const [salesman, setSalesman] = useState('');
+
+    useEffect(() => {
+        if (isEdit && selectCustomer) {
+            setQty(selectCustomer.qty);  // Corrected typo from 'qyt' to 'qty'
+            setCategory(selectCustomer.category);
+            setSalesman(selectCustomer.salesman_id);
+        }
+    }, [selectCustomer, isEdit]);
 
     const addJob = () => {
         setLoading(true);
@@ -22,36 +30,40 @@ const AddJob = ({ allSalesman, setLoading, customerId, onSubmit }) => {
         bodyFormData.append('category', category);
         bodyFormData.append('qty', qty);
         bodyFormData.append('salesman_id', salesman);
-        axios({
-            method: 'post',
-            url: `${BASE_URL}${ADD_JOBS}`,
-            data: bodyFormData,
+        if (isEdit) {
+            bodyFormData.append('slno', selectCustomer.slno);
+        }
+
+        axios.post(`${BASE_URL}${isEdit ? EDIT_JOB : ADD_JOBS}`, bodyFormData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         })
             .then(response => {
                 const { data } = response;
-                const { status } = data;
-                if (status == 0) {
-                    console.log('unable to add Job');
+                if (data.status === 0) {
+                    console.log('Unable to add Job');
                 } else {
-                    console.log('Add Job Successfully');
-                    onSubmit()
+                    console.log('Job added successfully');
+                    
+                    onSubmit();
                 }
             })
             .catch(error => {
-                console.error('Error submitting Job:', error);
+                console.error('Error submitting job:', error);
             })
             .finally(() => {
                 setLoading(false);
             });
     };
 
-    const onSubmitHeandler = () => {
+    const onSubmitHandler = () => {
         if (qty && category && salesman) {
             addJob();
+            setQty('');
             setCategory('');
             setSalesman('');
-            setQty('');
+            if (isEdit) {
+                setSelectCustomer(null)
+            }
         }
     };
 
@@ -62,24 +74,18 @@ const AddJob = ({ allSalesman, setLoading, customerId, onSubmit }) => {
                 <Picker
                     selectedValue={salesman}
                     onValueChange={setSalesman}
-                    style={[styles.picker, styles.flexPicker]}>
-                    <Picker.Item
-                        label="Salesman"
-                        value=""
-                        style={{ textAlign: 'center' }}
-                    />
+                    style={[styles.picker, styles.flexPicker]}
+                >
+                    <Picker.Item label="Salesman" value="" />
                     {allSalesman.map((item, index) => (
-                        <Picker.Item
-                            key={index}
-                            label={item.name}
-                            value={item.salesman_id}
-                        />
+                        <Picker.Item key={index} label={item.name} value={item.salesman_id} />
                     ))}
                 </Picker>
                 <Picker
                     selectedValue={category}
                     onValueChange={setCategory}
-                    style={[styles.picker, styles.flexPicker]}>
+                    style={[styles.picker, styles.flexPicker]}
+                >
                     <Picker.Item label="Category" value="" />
                     <Picker.Item label="C" value="C" />
                     <Picker.Item label="H" value="H" />
@@ -94,8 +100,7 @@ const AddJob = ({ allSalesman, setLoading, customerId, onSubmit }) => {
                 onChangeText={text => setQty(text.replace(/[^0-9]/g, ''))}
                 keyboardType="numeric"
             />
-
-            <TouchableOpacity onPress={onSubmitHeandler} style={styles.button}>
+            <TouchableOpacity onPress={onSubmitHandler} style={styles.button}>
                 <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
         </View>

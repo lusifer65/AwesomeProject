@@ -6,6 +6,7 @@ import axios from 'axios';
 
 const AddPayment = ({ setLoading, customerId, onSubmit }) => {
   const [amount, setAmount] = useState('');
+  const [discount, setDiscount] = useState('');
   const [mode, setMode] = useState('');
 
   const addPayment = () => {
@@ -13,6 +14,7 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
     const bodyFormData = new FormData();
     bodyFormData.append('customer_id', customerId);
     bodyFormData.append('amount', amount);
+    bodyFormData.append('discount', discount);
     bodyFormData.append('mode', mode.split(0));
 
     axios({
@@ -41,10 +43,12 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
 
 
   const onSubmitHandler = () => {
-    if (amount && mode) {
+    if (amount && mode && discount) {
       addPayment()
       setMode('');
       setAmount('');
+      setDiscount('');
+
     }
   };
 
@@ -57,6 +61,13 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
           placeholder="Qty"
           value={amount}
           onChangeText={(text) => setAmount(text.replace(/[^0-9]/g, ''))}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Discount"
+          value={discount}
+          onChangeText={(text) => setDiscount(text.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
         />
         <Picker
@@ -92,6 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    gap:8,
   },
   input: {
     height: 40,
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   picker: {
-    flex: 1,
+    flex: 2,
     height: 40,
   },
   button: {

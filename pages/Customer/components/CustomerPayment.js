@@ -36,7 +36,6 @@ const CustomerPayment = ({ customer_id }) => {
                 } else {
                     // console.log(JsonData);
                     setPaymentData(JsonData);
-                    // setSalesman(JsonData.salesman || [])
                 }
             })
             .catch(error => {

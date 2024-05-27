@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import MarketIcon from '../../assets/common/dashboard.png';
 import ExpenceIcon from '../../assets/common/wallet.png';
-import { postRequest } from '../../src/utils';
-import { BASE_URL, DASHBOARD } from '../../src/constant';
+import { postRequest, retrieveUserId } from '../../src/utils';
+import { BASE_URL, DASHBOARD, GET_LOGIN_DATA } from '../../src/constant';
 import Loader from '../../src/components/Loader';
+import axios from 'axios';
 
 
-const Dashboard = ({ route }) => {
-  const { userId } = route.params || {};
+const Dashboard = ({ navigation, route }) => {
+  const { userId, name, phoneNumber } = route.params || {};
+  const [user, setUser] = useState({})
   const [dashboardData, setDashboardData] = useState({})
   const [loader, setLoader] = useState(true)
+  const [isAdmin, setAdmin] = useState(false)
 
   useEffect(() => {
     postRequest(`${BASE_URL}${DASHBOARD}`, JSON.stringify({ id: userId }), (res, error) => {
@@ -22,7 +25,49 @@ const Dashboard = ({ route }) => {
       }
       setLoader(false)
     })
+    getUserType();
   }, [])
+
+  useEffect(() => {
+    if (userId) {
+      const bodyFormData = new FormData();
+      bodyFormData.append('user_id', userId);
+      axios({
+        method: 'post',
+        url: `${BASE_URL}${GET_LOGIN_DATA}`,
+        data: bodyFormData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+        .then(response => {
+          const { data } = response;
+          const { message, data: userData, status } = data;
+          // console.log(data);
+          if (status == 0) {
+            console.log('Unable to add');
+          } else {
+            const { user_type } = userData
+            setAdmin(user_type === 'admin');
+            setUser(userData)
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+        })
+        .finally(() => {
+          setLoader(false);
+        });
+    }
+  }, [])
+
+  const getUserType = async () =>
+    await retrieveUserId('user_type').then(User_type => {
+      if (User_type != null) {
+        setLoader(false);
+        setAdmin(User_type === 'admin');
+      } else {
+        setLoader(false);
+      }
+    });
 
   const RowItem = ({ work }) => {
     const [total, counter, market] = dashboardData[work]
@@ -45,6 +90,11 @@ const Dashboard = ({ route }) => {
       <View>
         <Text style={styles.headerText}>Dashboard</Text>
 
+        {user.name && <View style={[styles.gridRow, { paddingHorizontal: 48, gap: 16, paddingBottom: 16 }]}>
+          <Text style={[{ fontWeight: '600' }]}>{user.name}</Text>
+          <Text>Phone No. {user.phone}</Text>
+        </View>
+        }
         <View style={styles.gridRow}>
           <Text style={styles.gridHeaderText}>Work</Text>
           <Text style={styles.gridHeaderText}>Total</Text>
@@ -55,7 +105,7 @@ const Dashboard = ({ route }) => {
         {Object.keys(dashboardData).map((work) => { return <RowItem work={work} key={work} /> })}
       </View>
       <View style={{ marginVertical: 16 }}>
-        <TouchableOpacity style={styles.cardContainer} >
+        <TouchableOpacity style={styles.cardContainer} onPress={() => navigation.navigate('report1')}>
           <Image source={MarketIcon} style={styles.cardImage} />
           <Text style={styles.cardText}>Marketing Man Wise Report</Text>
         </TouchableOpacity>
@@ -64,6 +114,11 @@ const Dashboard = ({ route }) => {
           <Image source={ExpenceIcon} style={styles.cardImage} />
           <Text style={styles.cardText}>Daily Expenses Report</Text>
         </TouchableOpacity>
+
+        {isAdmin && <TouchableOpacity style={styles.cardContainer}>
+          <Image source={MarketIcon} style={styles.cardImage} />
+          <Text style={styles.cardText}>Report for Admin only</Text>
+        </TouchableOpacity>}
 
       </View>
     </ScrollView>
@@ -80,7 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '500',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
     color: '#000'
   },
   gridRow: {
