@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View, ScrollView } from 'react-native';
+import { Image, StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, ToastAndroid } from 'react-native';
 
 import React, { useEffect, useState } from 'react';
 
@@ -6,13 +6,18 @@ import PaymentIcon from '../../../assets/common/Payment.png';
 
 import AddPayment from './AddPayment';
 import axios from 'axios';
-import { BASE_URL, GET_PAYMENT } from '../../../src/constant';
+import { BASE_URL, DELETE_PAYMENT, GET_PAYMENT } from '../../../src/constant';
 import Loader from '../../../src/components/Loader';
 import ShareButton from '../../../src/components/ShareButton';
+import ConfirmPopup from '../../../src/components/ConfirmPopup';
 
-const CustomerPayment = ({ customer_id }) => {
+const CustomerPayment = ({ customer_id, isAdmin }) => {
     const [paymentData, setPaymentData] = useState([]);
     const [isLoading, setLoading] = useState(false);
+    const [deletePopup, setDeletePopup] = useState(false);
+    const [popup, setPopup] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    const [selectExpence, setSelectExpence] = useState(null);
 
     useEffect(() => {
         getPayment();
@@ -46,6 +51,41 @@ const CustomerPayment = ({ customer_id }) => {
             });
     };
 
+
+    const handleDelete = async () => {
+        setLoading(true);
+        try {
+            const bodyFormData = new FormData();
+            bodyFormData.append('slno', selectExpence?.slno);
+            console.log(selectExpence.slno);
+            const response = await axios.post(
+                `${BASE_URL}${DELETE_PAYMENT}`,
+                bodyFormData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                },
+            );
+            const { data } = response;
+            const { status } = data;
+            if (status === 0) {
+                console.log('Invalid Customer Id');
+            } else {
+                ToastAndroid.show(`Delete Payment successfully`, ToastAndroid.SHORT);
+                getPayment();
+            }
+        } catch (error) {
+            console.error('Unable to delete Job', error);
+        } finally {
+            setDeletePopup(false);
+            setLoading(false);
+            setPopup(false);
+        }
+    }
+
+    const onClose = () => {
+        setPopup(false)
+    }
+
     const getModeValue = modeText => {
         switch (modeText) {
             case 'B':
@@ -58,14 +98,21 @@ const CustomerPayment = ({ customer_id }) => {
     };
     const TableRow = ({ item }) => {
         const { entry_date_time, amount, mode } = item;
+        const Row = isAdmin ? TouchableOpacity : View
         return (
-            <View style={styles.tableRow}>
+            <Row style={styles.tableRow}
+                onPress={() => {
+                    setIsEdit(false);
+                    setSelectExpence(item);
+                    setPopup(true);
+                }}
+            >
                 <Text style={[styles.cellText, { flex: 3 }]}>{entry_date_time}</Text>
                 <Text style={[styles.cellText, { flex: 1 }]}>
                     {getModeValue(mode)}
                 </Text>
                 <Text style={[styles.cellText, { flex: 2 }]}>{amount}</Text>
-            </View>
+            </Row>
         );
     };
 
@@ -83,7 +130,7 @@ const CustomerPayment = ({ customer_id }) => {
                             Payment Received
                         </Text>
                     </View>
-                    <ShareButton message={paymentData}/>
+                    <ShareButton message={paymentData} />
                     <View style={styles.tableRow}>
                         <Text style={[styles.cellText, { flex: 3, fontWeight: '500' }]}>
                             Date
@@ -104,7 +151,56 @@ const CustomerPayment = ({ customer_id }) => {
                 setLoading={setLoading}
                 customerId={customer_id}
                 onSubmit={getPayment}
+                isEdit={isEdit}
+                selectExpence={selectExpence}
+                setSelectExpence={setSelectExpence}
+                setIsEdit={setIsEdit}
             />
+
+            {popup && (
+                <Modal
+                    animationType="slide"
+                    transparent
+                    visible={popup}
+                    onRequestClose={onClose}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.header}>
+                                <Text style={styles.headerText}>Select</Text>
+                                <TouchableOpacity onPress={onClose}>
+                                    <Text style={styles.closeButton}>x</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{ flexDirection: 'row', gap: 24 }}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setIsEdit(true);
+                                        onClose();
+                                    }}
+                                    style={styles.button}>
+                                    <Text style={styles.buttonText}>Edit</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setDeletePopup(true)
+                                        onClose()
+                                    }}
+                                    style={[styles.button, { backgroundColor: 'red' }]}>
+                                    <Text style={styles.buttonText}>Delete</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            )}
+            {deletePopup && (
+                <ConfirmPopup
+                    showModal={deletePopup}
+                    setShowModal={setDeletePopup}
+                    onPressHandler={handleDelete}
+                    btnText={'Delete'}
+                />
+            )}
         </>
     );
 };
@@ -145,5 +241,59 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         fontSize: 14,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    },
+    modalView: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        width: '90%',
+        alignItems: 'center',
+        elevation: 5, // Android shadow
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    headerText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        flex: 1,
+    },
+    closeButton: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        paddingHorizontal: 10,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    dateInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 4,
+        padding: 12,
+        marginBottom: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    button: {
+        backgroundColor: '#0f0f0f',
+        padding: 12,
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
     },
 });

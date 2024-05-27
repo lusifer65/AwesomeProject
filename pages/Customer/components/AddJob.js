@@ -5,6 +5,7 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
+    ToastAndroid,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
@@ -17,7 +18,7 @@ const AddJob = ({ allSalesman, setLoading, customerId, onSubmit, selectCustomer,
 
     useEffect(() => {
         if (isEdit && selectCustomer) {
-            setQty(selectCustomer.qty);  // Corrected typo from 'qyt' to 'qty'
+            setQty(selectCustomer.qty.toString());
             setCategory(selectCustomer.category);
             setSalesman(selectCustomer.salesman_id);
         }
@@ -43,7 +44,7 @@ const AddJob = ({ allSalesman, setLoading, customerId, onSubmit, selectCustomer,
                     console.log('Unable to add Job');
                 } else {
                     console.log('Job added successfully');
-                    
+                    ToastAndroid.show(`${isEdit ? 'Edit' : 'Add'} Job successfully`, ToastAndroid.SHORT);
                     onSubmit();
                 }
             })

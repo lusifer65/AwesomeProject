@@ -6,6 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Modal,
+    ToastAndroid,
 } from 'react-native';
 
 import React, { useEffect, useState } from 'react';
@@ -72,6 +73,7 @@ const CustomerJob = ({ customer_id, isAdmin }) => {
                 console.log('Invalid Customer Id');
             } else {
                 console.log('Job deleted successfully');
+                ToastAndroid.show(`Delete Job successfully`, ToastAndroid.SHORT);
                 getJobs();
             }
         } catch (error) {

@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ToastAndroid } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { ADD_PAYMENT, BASE_URL } from '../../../src/constant';
+import { ADD_PAYMENT, BASE_URL, EDIT_PAYMENT } from '../../../src/constant';
 import axios from 'axios';
 
-const AddPayment = ({ setLoading, customerId, onSubmit }) => {
+const AddPayment = ({ setLoading, customerId, onSubmit, isEdit, selectExpence, setSelectExpence, setIsEdit }) => {
   const [amount, setAmount] = useState('');
   const [discount, setDiscount] = useState('');
   const [mode, setMode] = useState('');
+
+  useEffect(() => {
+    console.log(selectExpence);
+    if (isEdit && selectExpence) {
+      setAmount(selectExpence.amount.toString())
+      setMode(selectExpence.mode)
+    }
+  }, [isEdit, selectExpence])
+
 
   const addPayment = () => {
     setLoading(true);
@@ -17,9 +26,12 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
     bodyFormData.append('discount', discount);
     bodyFormData.append('mode', mode.split(0));
 
+    if (isEdit) {
+      bodyFormData.append('slno', selectExpence.slno);
+    }
     axios({
       method: 'post',
-      url: `${BASE_URL}${ADD_PAYMENT}`,
+      url: `${BASE_URL}${isEdit ? EDIT_PAYMENT : ADD_PAYMENT}`,
       data: bodyFormData,
       headers: { 'Content-Type': 'multipart/form-data' },
     })
@@ -30,6 +42,9 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
           console.log('Unable to add Payment');
         } else {
           console.log('Add Payment Successfully');
+          ToastAndroid.show(`${isEdit ? 'Edit' : 'Add'} Payment successfully`, ToastAndroid.SHORT);
+          setSelectExpence(null)
+          setIsEdit(false)
           onSubmit()
         }
       })
@@ -48,7 +63,6 @@ const AddPayment = ({ setLoading, customerId, onSubmit }) => {
       setMode('');
       setAmount('');
       setDiscount('');
-
     }
   };
 
@@ -103,7 +117,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    gap:8,
+    gap: 8,
   },
   input: {
     height: 40,

@@ -54,33 +54,15 @@ export const postRequest = async (url, body, callback) => {
 
 
 export const formatTable = (data) => {
-
-    const headers = Object.keys(data[0]);
-    const colWidths = {};
-    headers.forEach(header => {
-        colWidths[header] = header.length;
-    });
-
-    data.forEach(entry => {
-        headers.forEach(header => {
-            colWidths[header] = Math.max(colWidths[header], String(entry[header]).length);
-        });
-    });
-
-
-    const rowFormat = headers.map(header => `{{:${colWidths[header]}}}`).join(" | ");
-
-
-    let table = headers.map(header => header.padEnd(colWidths[header])).join(" | ");
-    table += "\n" + headers.map(header => "-".repeat(colWidths[header])).join("-+-");
-
-
-    data.forEach(entry => {
-        const row = headers.map(header => String(entry[header]).padEnd(colWidths[header])).join(" | ");
-        table += "\n" + row;
-    });
-
-
-    return table.split('\n').map(line => line.trim()).join('\n');
+    if (!data || !data.length || data.length == 0) {
+        return 'No data available'
+    }
+    const headers = '(' + Object.keys(data[0]).join(', ') + ')';
+    let body = ""
+    for (let value of data) {
+        console.log(value);
+        body = body + "\n(" + Object.values(value).join(', ') + ")"
+    }
+    return headers + '\n' + body;
 }
 

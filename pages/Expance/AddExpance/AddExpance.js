@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    TextInput,
+    StyleSheet,
+    TouchableOpacity,
+    ToastAndroid,
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { getCurrentDateTime } from '../../../src/utils';
 import Loader from '../../../src/components/Loader';
-import { ADD_EXPANCE, BASE_URL } from '../../../src/constant';
+import { ADD_EXPANCE, BASE_URL, EDIT_EXPANCE } from '../../../src/constant';
 import axios from 'axios';
 
-const AddExpance = ({ setIsUpdateExpression }) => {
+const AddExpance = ({
+    setIsUpdateExpression,
+    isEdit,
+    selectExpence,
+    setIsEdit,
+}) => {
     const [amount, setAmount] = useState('');
     const [purpose, setPurpose] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        console.log(selectExpence);
+        if (isEdit && selectExpence) {
+            setAmount(selectExpence?.amount.toString());
+            setPurpose(selectExpence.purpose);
+            setDescription(selectExpence.description);
+        }
+    }, [isEdit, selectExpence]);
 
     const addExpanceHandler = () => {
         setLoading(true);
@@ -19,11 +38,14 @@ const AddExpance = ({ setIsUpdateExpression }) => {
         bodyFormData.append('amount', amount);
         bodyFormData.append('purpose', purpose);
         bodyFormData.append('description', description);
+        if (isEdit) {
+            bodyFormData.append('slno', selectExpence.slno);
+        }
 
-        setLoading(true)
+        setLoading(true);
         axios({
             method: 'post',
-            url: `${BASE_URL}${ADD_EXPANCE}`,
+            url: `${BASE_URL}${isEdit ? EDIT_EXPANCE : ADD_EXPANCE}`,
             data: bodyFormData,
             headers: { 'Content-Type': 'multipart/form-data' },
         })
@@ -33,8 +55,12 @@ const AddExpance = ({ setIsUpdateExpression }) => {
                 if (status == 0) {
                     console.log('Unable to add');
                 } else {
-                    setIsUpdateExpression(true)
+                    setIsUpdateExpression(true);
                     console.log('Add Expance Success');
+                    ToastAndroid.show(
+                        `${isEdit ? 'Edit' : 'Add'} Expance successfully`,
+                        ToastAndroid.SHORT,
+                    );
                 }
             })
             .catch(error => {
@@ -42,17 +68,13 @@ const AddExpance = ({ setIsUpdateExpression }) => {
             })
             .finally(() => {
                 setLoading(false);
+                setIsEdit(false);
             });
-
-
     };
-
-
 
     const handleSubmit = () => {
         if (amount && purpose && description) {
-
-            addExpanceHandler()
+            addExpanceHandler();
             setAmount('');
             setPurpose('');
             setDescription('');
@@ -60,7 +82,7 @@ const AddExpance = ({ setIsUpdateExpression }) => {
     };
 
     if (loading) {
-        <Loader />
+        <Loader />;
     }
 
     return (
@@ -72,18 +94,18 @@ const AddExpance = ({ setIsUpdateExpression }) => {
                     placeholder="Enter amount"
                     keyboardType="numeric"
                     value={amount}
-                    onChangeText={setAmount}
+                    onChangeText={text => setAmount(text)}
                 />
                 <Picker
                     selectedValue={purpose}
                     style={styles.flexInput}
-                    onValueChange={setPurpose}
-                >
+                    onValueChange={setPurpose}>
                     <Picker.Item label="Purpose" value="" />
                     <Picker.Item label="Grocery" value="Grocery" />
                     <Picker.Item label="Petrol" value="Petrol" />
                     <Picker.Item label="Electric bill" value="Electric bill" />
                     <Picker.Item label="Maintenance" value="Maintenance" />
+                    <Picker.Item label="Rent" value="RENT" />
                 </Picker>
             </View>
             <TextInput
