@@ -13,6 +13,8 @@ const AddPayment = ({ setLoading, customerId, onSubmit, isEdit, selectExpence, s
     console.log(selectExpence);
     if (isEdit && selectExpence) {
       setAmount(selectExpence.amount.toString())
+      setDiscount(selectExpence.discount.toString())
+
       setMode(selectExpence.mode)
     }
   }, [isEdit, selectExpence])
@@ -92,7 +94,6 @@ const AddPayment = ({ setLoading, customerId, onSubmit, isEdit, selectExpence, s
           <Picker.Item label="Mode" value="" />
           <Picker.Item label="Cash" value="C" />
           <Picker.Item label="Bank" value="B" />
-          <Picker.Item label="Online" value="O" />
 
         </Picker>
       </View>

@@ -90,8 +90,6 @@ const CustomerPayment = ({ customer_id, isAdmin }) => {
         switch (modeText) {
             case 'B':
                 return 'Bank';
-            case 'O':
-                return 'Online';
             default:
                 return 'Cash';
         }
