@@ -1,0 +1,20 @@
+R_DEF: Internal format may change without notice
+local
+drawable assets_common_dashboard
+drawable assets_common_jobrate
+drawable assets_common_jobreceived
+drawable assets_common_login
+drawable assets_common_logouticon
+drawable assets_common_payment
+drawable assets_common_shareicon
+drawable assets_common_user
+drawable assets_common_wallet
+drawable node_modules_reactnavigation_elements_src_assets_backicon
+drawable node_modules_reactnavigation_elements_src_assets_backiconmask
+drawable rn_edit_text_material
+integer react_native_dev_server_port
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
+string app_name
+style AppTheme
