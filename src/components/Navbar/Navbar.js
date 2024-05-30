@@ -20,7 +20,7 @@ const Navbar = ({ navigation }) => {
   const [showModal, setShowModal] = useState(false);
 
   const logoutHandler = () => {
-    // AsyncStorage.clear();
+    AsyncStorage.clear();
     setShowModal(false)
     navigation.navigate('login');
 
@@ -56,9 +56,7 @@ const NavItem = ({ icon, label, setShowModal = () => { } }) => {
       style={styles.navItem}
       onPress={() => {
         if (label === 'Logout') {
-          // AsyncStorage.clear();
           setShowModal(true);
-          // navigation.navigate('login')
         } else {
           navigation.navigate(label.toLowerCase());
         }
