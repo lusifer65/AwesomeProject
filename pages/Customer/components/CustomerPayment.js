@@ -57,7 +57,6 @@ const CustomerPayment = ({ customer_id, isAdmin }) => {
         try {
             const bodyFormData = new FormData();
             bodyFormData.append('slno', selectExpence?.slno);
-            console.log(selectExpence.slno);
             const response = await axios.post(
                 `${BASE_URL}${DELETE_PAYMENT}`,
                 bodyFormData,
@@ -95,7 +94,7 @@ const CustomerPayment = ({ customer_id, isAdmin }) => {
         }
     };
     const TableRow = ({ item }) => {
-        const { entry_date_time, amount, mode } = item;
+        const { entry_date_time, amount, mode ,discount} = item;
         const Row = isAdmin ? TouchableOpacity : View
         return (
             <Row style={styles.tableRow}
@@ -106,9 +105,10 @@ const CustomerPayment = ({ customer_id, isAdmin }) => {
                 }}
             >
                 <Text style={[styles.cellText, { flex: 3 }]}>{entry_date_time}</Text>
-                <Text style={[styles.cellText, { flex: 1 }]}>
+                <Text style={[styles.cellText, { flex: 2 }]}>
                     {getModeValue(mode)}
                 </Text>
+                <Text style={[styles.cellText, { flex: 2 }]}>{discount}</Text>
                 <Text style={[styles.cellText, { flex: 2 }]}>{amount}</Text>
             </Row>
         );
@@ -133,8 +133,11 @@ const CustomerPayment = ({ customer_id, isAdmin }) => {
                         <Text style={[styles.cellText, { flex: 3, fontWeight: '500' }]}>
                             Date
                         </Text>
-                        <Text style={[styles.cellText, { flex: 1, fontWeight: '500' }]}>
+                        <Text style={[styles.cellText, { flex: 2, fontWeight: '500' }]}>
                             Mode
+                        </Text>
+                        <Text style={[styles.cellText, { flex: 2, fontWeight: '500' }]}>
+                            Discount
                         </Text>
                         <Text style={[styles.cellText, { flex: 2, fontWeight: '500' }]}>
                             Amount

@@ -10,7 +10,6 @@ const AddPayment = ({ setLoading, customerId, onSubmit, isEdit, selectExpence, s
   const [mode, setMode] = useState('');
 
   useEffect(() => {
-    console.log(selectExpence);
     if (isEdit && selectExpence) {
       setAmount(selectExpence.amount.toString())
       setDiscount(selectExpence.discount.toString())
